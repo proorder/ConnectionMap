@@ -1,3 +1,5 @@
+import type ConnectionMap from '../ConnectionMap'
+
 export interface IConnectable {
     addConnection: () => void
 }
@@ -14,6 +16,7 @@ export const enum TransmitterEvent {
     Down,
     Up,
     Double,
+    Click,
 }
 
 export interface IEventful {
@@ -38,8 +41,10 @@ export interface IShape {
 
     inEvent: (cursor: { x: number, y: number }) => boolean
     computeQuarters: (centerX: number, centerY: number) => void
+    getRelativePosition: () => { x: number, y: number }
     getQuarters: () => Quarter[]
     setFigure: (figure: IBaseFigure) => void
+    setRoot: (root: ConnectionMap) => void
     setReRenderCallback: (callback: () => void) => void
     onPointerDown?: (pointer: { x: number, y: number }) => void | ((event: TransmitterEvent) => void)
     onPointerUp?: (pointer: { x: number, y: number }) => void | ((event: TransmitterEvent) => void)

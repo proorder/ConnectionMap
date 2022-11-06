@@ -1,7 +1,11 @@
 import type { IBaseFigure, IConnectable, IEventful, IShape, Quarter } from '../types'
 import { MethodNotImplemented } from '../errors'
+import type ConnectionMap from '../ConnectionMap'
+
+type SetupFigure = (options: { root: ConnectionMap, reRerenderCallback: () => void }) => void
 
 export default class BaseFigure implements IBaseFigure, IConnectable, IEventful {
+    $root: ConnectionMap | null = null
     shapes: IShape[] = []
     reRenderCallback: (() => void) | null = null
 
@@ -31,16 +35,21 @@ export default class BaseFigure implements IBaseFigure, IConnectable, IEventful 
         throw new MethodNotImplemented()
     }
 
+    setupFigure: SetupFigure = ({
+        root,
+        reRerenderCallback,
+    }) => {
+        this.$root = root
+        this.reRenderCallback = reRerenderCallback
+        this.setupShapes()
+    }
+
     setupShapes () {
         this.shapes.forEach((s) => {
+            s.setRoot(this.$root as ConnectionMap)
             s.setReRenderCallback(this.reRenderCallback as () => void)
             s.setFigure(this)
         })
-    }
-
-    setReRenderCallback (callback: () => void) {
-        this.reRenderCallback = callback
-        this.setupShapes()
     }
 
     determineElement (quarter: Quarter, cursor: { x: number, y: number }) {

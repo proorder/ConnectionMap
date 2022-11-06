@@ -69,7 +69,18 @@ export default class Transmitter {
         })
 
         this.canvas.addEventListener('pointerdown', this.onPointerDown.bind(this))
+        this.canvas.addEventListener('click', this.onClick.bind(this))
         this.canvas.addEventListener('pointerup', this.onPointerUp.bind(this))
+    }
+
+    onClick ({ offsetX, offsetY }: MouseEvent) {
+        this.eventMiddleware(TransmitterEvent.Click)
+        const shape = this.detectElement(offsetX, offsetY)
+        if (!shape || !shape.onClick) {
+            return
+        }
+
+        shape.onClick({ x: offsetX, y: offsetY })
     }
 
     onPointerDown ({ offsetX, offsetY, pointerId }: PointerEvent) {

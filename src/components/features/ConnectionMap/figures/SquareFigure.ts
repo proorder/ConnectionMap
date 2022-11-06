@@ -8,10 +8,10 @@ export default class SquareFigure extends BaseFigure {
         this.x = x
         this.y = y
 
-        this.setupFigure()
+        this.defineShapes()
     }
 
-    setupFigure () {
+    defineShapes () {
         this.shapes =  [
             new Square(0, 0, 40),
             new Circle(-40, 0, 20),

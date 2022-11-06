@@ -47,7 +47,10 @@ export default class ConnectionMap {
     }
 
     addFigure (figure: BaseFigure) {
-        figure.setReRenderCallback(this.render.bind(this))
+        figure.setupFigure({
+            root: this,
+            reRerenderCallback: this.render.bind(this),
+        })
         this.figures.push(figure)
         this.render()
 
