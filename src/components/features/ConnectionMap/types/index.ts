@@ -9,6 +9,13 @@ export const enum Quarter {
     RightDown,
 }
 
+export const enum TransmitterEvent {
+    Move,
+    Down,
+    Up,
+    Double,
+}
+
 export interface IEventful {
     determineElement: (quarter: Quarter, cursor: { x: number, y: number }) => IShape | false
     onHover: (cursorPosition: { relativeX: number, relativeY: number }) => void
@@ -27,15 +34,19 @@ export interface IBaseFigure {
 export interface IShape {
     x: number
     y: number
+    id: string
 
     inEvent: (cursor: { x: number, y: number }) => boolean
     computeQuarters: (centerX: number, centerY: number) => void
     getQuarters: () => Quarter[]
-    onMouseDown?: () => void
-    onMouseUp?: () => void
-    onClick?: () => void
-    onHover?: () => void
-    onHoverOut?: () => void
+    setFigure: (figure: IBaseFigure) => void
+    setReRenderCallback: (callback: () => void) => void
+    onPointerDown?: (pointer: { x: number, y: number }) => void | ((event: TransmitterEvent) => void)
+    onPointerUp?: (pointer: { x: number, y: number }) => void | ((event: TransmitterEvent) => void)
+    onMove?: (pointer: { x: number, y: number }) => void | ((event: TransmitterEvent) => void)
+    onClick?: (pointer: { x: number, y: number }) => void | ((event: TransmitterEvent) => void)
+    onHover?: () => void | ((event: TransmitterEvent) => void)
+    onHoverOut?: () => void | ((event: TransmitterEvent) => void)
     render: (ctx: CanvasRenderingContext2D, position: { x: number, y: number, centerX: number, centerY: number }) => void
 }
 

@@ -16,6 +16,7 @@ export default class ConnectionMap {
     centerY: number = 0
     biasX: number = 0
     biasY: number = 0
+    isRenderInQueue: boolean = false
 
     mount (canvas: HTMLCanvasElement) {
         if (!canvas) {
@@ -46,6 +47,7 @@ export default class ConnectionMap {
     }
 
     addFigure (figure: BaseFigure) {
+        figure.setReRenderCallback(this.render.bind(this))
         this.figures.push(figure)
         this.render()
 
@@ -53,23 +55,32 @@ export default class ConnectionMap {
     }
 
     render () {
-        if (!this.ctx) {
-            throw new RenderingContextNotInstalled
+        if (this.isRenderInQueue) {
+            return
         }
 
-        this.ctx.fillStyle = '#96D8FF'
-        this.ctx.fillRect(0, 0, (this.canvas as HTMLCanvasElement).width, (this.canvas as HTMLCanvasElement).height)
+        this.isRenderInQueue = true
 
-        this.figures.forEach((f) => {
-            f.render(
-                this.ctx as CanvasRenderingContext2D,
-                {
-                    x: this.biasX,
-                    y: this.biasY,
-                    centerX: this.centerX,
-                    centerY: this.centerY,
-                }
-            )
+        requestAnimationFrame(() => {
+            if (!this.ctx) {
+                throw new RenderingContextNotInstalled
+            }
+
+            this.isRenderInQueue = false
+            this.ctx.fillStyle = '#96D8FF'
+            this.ctx.fillRect(0, 0, (this.canvas as HTMLCanvasElement).width, (this.canvas as HTMLCanvasElement).height)
+
+            this.figures.forEach((f) => {
+                f.render(
+                    this.ctx as CanvasRenderingContext2D,
+                    {
+                        x: this.biasX,
+                        y: this.biasY,
+                        centerX: this.centerX,
+                        centerY: this.centerY,
+                    }
+                )
+            })
         })
     }
 }

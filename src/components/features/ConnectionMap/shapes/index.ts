@@ -1,29 +1,44 @@
-import type { IShape, ShapeProps, Quarter } from '../types'
+import type { IShape, ShapeProps, Quarter, IBaseFigure } from '../types'
 import { MethodNotImplemented, QuarterNotComputed } from '../errors'
 import { computeQuarter } from '../utils'
+import { v4 as uuid } from 'uuid'
 
 class Shape implements IShape {
     x: number = 0
     y: number = 0
+    id: string = uuid()
     relativeX: number = 0
     relativeY: number = 0
     fill: string = '#FAA36B'
     stroke: string = '#E2FA2D'
     strokeWidth: number = 0
     quarters: Quarter[] = []
+    figure: IBaseFigure | null = null
+    _pointerDownStart: null | { x: number, y: number } = null
+    _lastPointerMove: null | { x: number, y: number } = null
+
+    reRenderCallback: null | (() => void) = null
+
+    setReRenderCallback (callback: () => void) {
+        this.reRenderCallback = callback
+    }
+
+    setFigure (figure: IBaseFigure) {
+        this.figure = figure
+    }
 
     computeQuarters (centerX: number, centerY: number) {
         throw new MethodNotImplemented()
+    }
+
+    getQuarters () {
+        return this.quarters
     }
 
     inEvent (cursor: { x: number, y: number }) {
         throw new MethodNotImplemented()
 
         return false
-    }
-
-    getQuarters () {
-        return this.quarters
     }
 
     render (ctx: CanvasRenderingContext2D, position: { x: number, y: number, centerX: number, centerY: number }) {
@@ -50,8 +65,16 @@ export class Square extends Shape {
         this.radius = radius
     }
 
-    onMouseDown () {
-        console.log('Ssquare')
+    onPointerDown (pointer: { x: number, y: number }) {
+        this._pointerDownStart = pointer
+    }
+
+    onMove (pointer: { x: number, y: number }) {
+        const { x: lastX, y: lastY } = (this._lastPointerMove || this._pointerDownStart) as { x: number, y: number }
+
+        this._lastPointerMove = pointer
+
+        this.figure?.move(pointer.x - lastX, pointer.y - lastY)
     }
 
     computeQuarters (centerX: number, centerY: number) {
@@ -115,6 +138,9 @@ export class Square extends Shape {
 
 export class Circle extends Shape {
     radius: number
+    isGrowing: boolean = false
+    isDecreasing: boolean = false
+    radiusIncreaseValue: number = 0
 
     constructor (x: number, y: number, radius: number, props?: ShapeProps) {
         super()
@@ -123,8 +149,19 @@ export class Circle extends Shape {
         this.radius = radius
     }
 
-    onMouseDown () {
+    onPointerDown () {
         console.log('Click')
+    }
+
+    onHover () {
+        this.isGrowing = true
+        this.reRenderCallback && this.reRenderCallback()
+    }
+
+    onHoverOut () {
+        this.isGrowing = false
+        this.isDecreasing = true
+        this.reRenderCallback && this.reRenderCallback()
     }
 
     computeQuarters (centerX: number, centerY: number) {
@@ -176,8 +213,22 @@ export class Circle extends Shape {
     protected ownRender (ctx: CanvasRenderingContext2D, x: number, y: number) {
         ctx.beginPath()
         ctx.fillStyle = '#E0FFFD'
-        ctx.arc(x, y, this.radius, 0, Math.PI * 2)
+        ctx.arc(x, y, this.radius + this.radiusIncreaseValue, 0, Math.PI * 2)
         ctx.fill()
         ctx.closePath()
+
+        if (this.isGrowing && this.radiusIncreaseValue < 6) {
+            this.radiusIncreaseValue += 1
+            this.reRenderCallback && this.reRenderCallback()
+        } else if (this.isGrowing) {
+            this.isGrowing = false
+        }
+
+        if (this.isDecreasing && this.radiusIncreaseValue > 0) {
+            this.radiusIncreaseValue -= 1
+            this.reRenderCallback && this.reRenderCallback()
+        } else if (this.isDecreasing) {
+            this.isDecreasing = false
+        }
     }
 }
