@@ -1,12 +1,14 @@
 import Shape from './Shape'
 import type { ShapeProps, Quarter } from '../types'
 import { computeQuarter } from '../utils'
+import CurveLineFigure from '../figures/CurveLineFigure'
 
 export default class Circle extends Shape {
     radius: number
     isGrowing: boolean = false
     isDecreasing: boolean = false
     radiusIncreaseValue: number = 0
+    curve: CurveLineFigure | null = null
 
     constructor (x: number, y: number, radius: number, props?: ShapeProps) {
         super()
@@ -16,7 +18,19 @@ export default class Circle extends Shape {
     }
 
     onClick () {
-        console.log('Click up')
+        if (this.curve) {
+            this.curve.delete()
+        }
+
+        const existsCurve = this.$root?.findOpenCurve()
+
+        if (existsCurve) {
+            this.curve = existsCurve
+            this.curve.setEndPoint(this)
+        } else {
+            this.curve = new CurveLineFigure(this)
+            this.$root?.addFigure(this.curve)
+        }
     }
 
     onHover () {

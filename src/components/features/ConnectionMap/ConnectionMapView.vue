@@ -10,19 +10,20 @@ import { SquareFigure } from './figures'
 
 const canvas: Ref<HTMLCanvasElement | undefined> = ref()
 
-const map = new ConnectionMap()
+const map = ref(new ConnectionMap())
 
 function mountMap () {
     if (!canvas.value) {
         return
     }
 
-    map.mount(canvas.value)
+    map.value.mount(canvas.value)
+    map.value.render()
 
-    map
-        .addFigure(new SquareFigure(0, 0))
-        .addFigure(new SquareFigure(-60, 150))
-        .addFigure(new SquareFigure(200, -30))
+    // map
+    //     .addFigure(new SquareFigure(0, 0))
+    //     .addFigure(new SquareFigure(-60, 150))
+    //     .addFigure(new SquareFigure(200, -30))
 }
 
 onMounted(() => {
@@ -30,8 +31,22 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-    map.unmount()
+    map.value.unmount()
 })
+
+defineExpose({
+    map,
+})
+</script>
+
+<script lang="ts">
+export default {
+    watch: {
+        '$store.getters.figures' (prev, nextValue) {
+            this.map.addFigures(nextValue)
+        },
+    },
+}
 </script>
 
 <style>

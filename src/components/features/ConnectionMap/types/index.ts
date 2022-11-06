@@ -31,7 +31,7 @@ export interface IBaseFigure {
 
     delete: () => void
     move: (relativeX: number, relativeY: number) => void
-    render: (ctx: CanvasRenderingContext2D, bias: { x: number, y: number, centerX: number, centerY: number }) => void
+    render: (ctx: CanvasRenderingContext2D, bias: { x: number, y: number, centerX: number, centerY: number, cursorX: number, cursorY: number }) => void
 }
 
 export interface IShape {
@@ -52,7 +52,7 @@ export interface IShape {
     onClick?: (pointer: { x: number, y: number }) => void | ((event: TransmitterEvent) => void)
     onHover?: () => void | ((event: TransmitterEvent) => void)
     onHoverOut?: () => void | ((event: TransmitterEvent) => void)
-    render: (ctx: CanvasRenderingContext2D, position: { x: number, y: number, centerX: number, centerY: number }) => void
+    render: (ctx: CanvasRenderingContext2D, position: { x: number, y: number, centerX: number, centerY: number, cursorX: number, cursorY: number }) => void
 }
 
 export interface ShapeProps {

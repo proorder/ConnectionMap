@@ -1,6 +1,7 @@
 import type { IBaseFigure, IConnectable, IEventful, IShape, Quarter } from '../types'
 import { MethodNotImplemented } from '../errors'
 import type ConnectionMap from '../ConnectionMap'
+import { v4 as uuid } from 'uuid'
 
 type SetupFigure = (options: { root: ConnectionMap, reRerenderCallback: () => void }) => void
 
@@ -8,6 +9,8 @@ export default class BaseFigure implements IBaseFigure, IConnectable, IEventful 
     $root: ConnectionMap | null = null
     shapes: IShape[] = []
     reRenderCallback: (() => void) | null = null
+    priority: number = 0
+    id: string = uuid()
 
     x = 0
     y = 0
@@ -21,7 +24,7 @@ export default class BaseFigure implements IBaseFigure, IConnectable, IEventful 
     }
 
     delete () {
-        throw new MethodNotImplemented()
+        this.$root?.deleteFigure(this.id)
     }
 
     move (x: number, y: number) {
@@ -66,13 +69,15 @@ export default class BaseFigure implements IBaseFigure, IConnectable, IEventful 
         return false
     }
 
-    render (ctx: CanvasRenderingContext2D, bias: { x: number, y: number, centerX: number, centerY: number }) {
+    render (ctx: CanvasRenderingContext2D, bias: { x: number, y: number, centerX: number, centerY: number, cursorX: number, cursorY: number }) {
         this.shapes.forEach((s) => {
             s.render(ctx, {
                 x: this.x + bias.x,
                 y: this.y + bias.y,
                 centerX: bias.centerX,
                 centerY: bias.centerY,
+                cursorX: bias.cursorX,
+                cursorY: bias.cursorY,
             })
         })
     }

@@ -2,18 +2,9 @@ import Shape from './Shape'
 import type { IShape } from '../types'
 
 export default class CurveLine extends Shape {
-    // endX: number
-    // endY: number
-
-    // constructor (startPoint: { x: number, y: number }, endPoint: { x: number, y: number }) {
-    //     super()
-    //     this.x = startPoint.x
-    //     this.y = startPoint.y
-    //     this.endX = endPoint.x
-    //     this.endY = endPoint.y
-    // }
     startPoint: IShape
     endPoint: IShape | null
+    stroke: string = '#FA806B'
 
     constructor (startPoint: IShape, endPoint: IShape | null) {
         super()
@@ -34,14 +25,21 @@ export default class CurveLine extends Shape {
         return false
     }
 
+    render (ctx: CanvasRenderingContext2D, position: { cursorX: number, cursorY: number }) {
+        const { cursorX, cursorY } = position
+
+        this.ownRender(ctx, cursorX, cursorY)
+    }
+
     ownRender (ctx: CanvasRenderingContext2D, x: number, y: number) {
         console.log('Curve')
 
         const { x: startX, y: startY } = this.startPoint.getRelativePosition()
         let endX, endY
         if (this.endPoint) {
-            endX = this.endPoint.x
-            endY = this.endPoint.y
+            const { x: endRelativeX, y: endRelativeY } = this.endPoint.getRelativePosition()
+            endX = endRelativeX
+            endY = endRelativeY
         } else {
             endX = x
             endY = y
@@ -49,8 +47,14 @@ export default class CurveLine extends Shape {
 
         ctx.beginPath()
         ctx.strokeStyle = this.stroke
+        ctx.lineWidth = 2
         ctx.moveTo(startX, startY)
         ctx.lineTo(endX, endY)
+        ctx.stroke()
         ctx.closePath()
+
+        if (!this.endPoint) {
+            this.reRenderCallback && this.reRenderCallback()
+        }
     }
 }

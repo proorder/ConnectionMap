@@ -53,7 +53,7 @@ export default class Shape implements IShape {
         return false
     }
 
-    render (ctx: CanvasRenderingContext2D, position: { x: number, y: number, centerX: number, centerY: number }) {
+    render (ctx: CanvasRenderingContext2D, position: { x: number, y: number, centerX: number, centerY: number, cursorX: number, cursorY: number }) {
         const { x, y, centerX, centerY } = position
 
         this.relativeX = x + this.x

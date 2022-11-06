@@ -6,12 +6,13 @@ export default class CurveLineFigure extends BaseFigure {
     startPoint: IShape
     endPoint: IShape | null
     shapes: CurveLine[] = []
+    priority: number = 10
 
-    constructor (startPoint: IShape, endPoint: IShape | null) {
+    constructor (startPoint: IShape, endPoint?: IShape | null | undefined) {
         super()
 
         this.startPoint = startPoint
-        this.endPoint = endPoint
+        this.endPoint = endPoint || null
 
         this.defineShapes()
     }

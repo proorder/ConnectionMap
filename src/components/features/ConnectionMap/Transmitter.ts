@@ -11,10 +11,12 @@ export default class Transmitter {
     getProvidedFigures: () => Iterable<IEventful>
     onHoverState: IShape[] = []
     onDownState: IShape[] = []
+    emitCursor: (x: number, y: number) => void
 
-    constructor (canvas: HTMLCanvasElement, getFigures: () => Iterable<IEventful>) {
+    constructor (canvas: HTMLCanvasElement, getFigures: () => Iterable<IEventful>, emitCursor: (x: number, y: number) => void) {
         this.canvas = canvas
         this.getProvidedFigures = getFigures
+        this.emitCursor = emitCursor
 
         this.initialize()
     }
@@ -44,6 +46,7 @@ export default class Transmitter {
         this.centerY = height / 2
 
         this.canvas.addEventListener('pointermove', ({ offsetX, offsetY }) => {
+            this.emitCursor(offsetX, offsetY)
             if (this.onDownState.length) {
                 this.onDownState.forEach(s => {
                     s.onMove && s.onMove({ x: offsetX, y: offsetY })
