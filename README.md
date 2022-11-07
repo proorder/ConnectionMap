@@ -4,7 +4,7 @@
 npm install && npm run dev
 ```
 
-[Ссылка на задание](https://github.com/proorder/ConnectionMap/blob/master/task.pdf)
+[Ссылка на задание](https://github.com/proorder/ConnectionMap/blob/master/Task.pdf)
 
 ## Некоторые выводы
 
