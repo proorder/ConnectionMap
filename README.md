@@ -4,6 +4,8 @@
 npm install && npm run dev
 ```
 
+[Ссылка на задание](https://github.com/proorder/ConnectionMap/blob/master/task.pdf)
+
 ## Некоторые выводы
 
 - Проект получился удобным для расширения, если ты имеешь доступ к исходному коду.
