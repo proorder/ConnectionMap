@@ -4,13 +4,15 @@
         <div class="flex">
             <div class="shapes-mover" ref="shapeMover">
                 <div
-                    v-for="f in figures"
+                    v-for="f in shapes"
                     :key="f.id"
                     :class="`${f.type} figure`"
                     :ref="f.id"
                     :style="{ background: f.color }"
+                    @mousedown="figureDown(f.id, $event)"
                 >
                     <div class="expander" @mousedown="expanderDown(f.id, $event)"></div>
+                    <div class="delete" @mouseup="deleteShape(f.id)"></div>
                 </div>
             </div>
             <div class="shape-list">
@@ -22,7 +24,7 @@
                     <div v-if="choosenType" class="color-selector-container">
                         Choose color
                         <div class="color-selector">
-                            <div v-for="c in colors" :style="{ backgroundColor: c }" :key="c" @click="addFigure(c)"></div>
+                            <div v-for="c in colors" :style="{ backgroundColor: c }" :key="c" @click="addShape(c)"></div>
                         </div>
                     </div>
                 </div>
@@ -33,29 +35,24 @@
 </template>
 
 <script lang="ts">
-import type { DefineComponent } from 'vue'
 import { v4 as uuid } from 'uuid'
-import type { Figure, StoreFigure } from '@/components/features/FigureConstructor/types'
+import type { Shape, ShapeData } from '@/components/features/FigureConstructor/types'
 
 type EventHandler = ({}: PointerEvent) => void
 let moveEventHandler: EventHandler | null = null
 let upEventHandler: EventHandler | null = null
 
-type ConstructorType = DefineComponent<{}, {}, {
-    expanderLastPosition: { x: number, y: number },
-}>
-
 export default {
     data () {
         return {
-            choosenType: null as null | Figure,
+            choosenType: null as null | Shape,
             colors: ['#FAA36B', '#E0FFFD', '#76F589', '#DE675F', '#E1B3FF'],
             shapeMoverSize: { width: 0, height: 0, left: 0, top: 0 },
             expanderLastPosition: { x: 0, y: 0 },
             expandedNow: null as null | string,
             isMouseDown: false,
-            basedTypes: ['square', 'circle'] as Figure[],
-            figures: [] as StoreFigure[],
+            basedTypes: ['square', 'circle'] as Shape[],
+            shapes: [] as ShapeData[],
         }
     },
     mounted () {
@@ -64,11 +61,14 @@ export default {
     },
     methods: {
         exportFigure () {
-            this.$store.dispatch('setFigures', this.figures)
+            this.$store.dispatch('addFigure', this.shapes)
         },
-        addFigure (color: string) {
-            this.figures.push({
-                type: this.choosenType as Figure,
+        deleteShape (id: string) {
+            this.shapes = this.shapes.filter(s => s.id !== id)
+        },
+        addShape (color: string) {
+            this.shapes.push({
+                type: this.choosenType as Shape,
                 radius: 20,
                 x: 0,
                 y: 0,
@@ -77,7 +77,7 @@ export default {
             })
             this.choosenType = null
         },
-        expanderDown (id: string, event: MouseEvent) {
+        figureDown (id: string, event: MouseEvent) {
             const { pageX, pageY } = event
             this.expandedNow = id
             this.expanderLastPosition = { x: pageX, y: pageY }
@@ -86,11 +86,36 @@ export default {
                 const x = pageX - this.expanderLastPosition.x
                 const y = pageY - this.expanderLastPosition.y
                 this.expanderLastPosition = { x: pageX, y: pageY }
-                const figure = this.figures.find(f => f.id === this.expandedNow)
-                figure.x += x
-                figure.y += y
-                this.$refs[this.expandedNow][0].style.left = `${this.shapeMoverSize.width / 2 + figure.x + this.shapeMoverSize.left}px`
-                this.$refs[this.expandedNow][0].style.top = `${this.shapeMoverSize.height / 2 + figure.y + this.shapeMoverSize.top}px`
+                const shape = this.shapes.find(f => f.id === this.expandedNow)
+                shape.x += x
+                shape.y += y
+                this.$refs[this.expandedNow][0].style.left = `${this.shapeMoverSize.width / 2 + shape.x + this.shapeMoverSize.left - shape.radius}px`
+                this.$refs[this.expandedNow][0].style.top = `${this.shapeMoverSize.height / 2 + shape.y + this.shapeMoverSize.top - shape.radius}px`
+
+            }.bind(this)
+
+            upEventHandler = function () {
+                document.removeEventListener('pointermove', moveEventHandler as EventHandler)
+                document.removeEventListener('pointerup', upEventHandler as EventHandler)
+            }.bind(this)
+
+            document.addEventListener('pointermove', moveEventHandler)
+            document.addEventListener('pointerup', upEventHandler)
+        },
+        expanderDown (id: string, event: MouseEvent) {
+            event.stopPropagation()
+            const { pageX, pageY } = event
+            this.expandedNow = id
+            this.expanderLastPosition = { x: pageX, y: pageY }
+            
+            moveEventHandler = function ({ pageX, pageY }: PointerEvent) {
+                const x = pageX - this.expanderLastPosition.x
+                const y = pageY - this.expanderLastPosition.y
+                this.expanderLastPosition = { x: pageX, y: pageY }
+                const shape = this.shapes.find(f => f.id === this.expandedNow)
+                shape.radius += x < 0 || y < 0 ? Math.max(x, y) : Math.min(x, y)
+                this.$refs[this.expandedNow][0].style.width = `${shape.radius * 2}px`
+                this.$refs[this.expandedNow][0].style.height = `${shape.radius * 2}px`
 
             }.bind(this)
 
@@ -140,6 +165,9 @@ export default {
     position: absolute;
 }
 .figure:hover > .expander {
+    display: block;
+}
+.figure:hover > .delete {
     display: block;
 }
 .figure-block:hover {
@@ -205,5 +233,35 @@ export default {
 .create-figure:hover {
     background-color: #89C5E8;
     color: #3E5969;
+}
+.delete {
+    display: none;
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    width: 20px;
+    height: 20px;
+    border-radius: 100%;
+    background: red;
+}
+.delete:before {
+    content: '';
+    position: absolute;
+    rotate: -45deg;
+    top: 4px;
+    left: 50%;
+    bottom: 4px;
+    width: 1px;
+    background: #FFF;
+}
+.delete:after {
+    content: '';
+    position: absolute;
+    rotate: 45deg;
+    top: 4px;
+    left: 50%;
+    bottom: 4px;
+    width: 1px;
+    background: #FFF;
 }
 </style>

@@ -1,4 +1,4 @@
-import type { IShape, Quarter, IBaseFigure } from '../types'
+import type { IShape, Quarter, IBaseFigure, ShapeProps } from '../types'
 import type ConnectionMap from '../ConnectionMap'
 import { MethodNotImplemented, QuarterNotComputed } from '../errors'
 import { v4 as uuid } from 'uuid'
@@ -22,6 +22,12 @@ export default class Shape implements IShape {
 
     setReRenderCallback (callback: () => void) {
         this.reRenderCallback = callback
+    }
+
+    setupProps (props: ShapeProps) {
+        this.fill = props.backgroundColor || this.fill
+        this.stroke = props.strokeColor || this.stroke
+        // this.? = props.strokeWidth || 
     }
 
     setFigure (figure: IBaseFigure) {

@@ -10,9 +10,14 @@ export default class Square extends Shape {
         this.x = x
         this.y = y
         this.radius = radius
+        
+        if (props) {
+            this.setupProps(props)
+        }
     }
 
     onPointerDown (pointer: { x: number, y: number }) {
+        this._lastPointerMove = null
         this._pointerDownStart = pointer
     }
 

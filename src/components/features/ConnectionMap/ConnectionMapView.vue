@@ -20,10 +20,10 @@ function mountMap () {
     map.value.mount(canvas.value)
     map.value.render()
 
-    // map
-    //     .addFigure(new SquareFigure(0, 0))
-    //     .addFigure(new SquareFigure(-60, 150))
-    //     .addFigure(new SquareFigure(200, -30))
+    map.value
+        .addFigure(new SquareFigure(0, 0))
+        .addFigure(new SquareFigure(-60, 150))
+        .addFigure(new SquareFigure(200, -30))
 }
 
 onMounted(() => {
@@ -42,8 +42,13 @@ defineExpose({
 <script lang="ts">
 export default {
     watch: {
-        '$store.getters.figures' (prev, nextValue) {
-            this.map.addFigures(nextValue)
+        '$store.getters.figures' (nextValue, prev) {
+            if (!nextValue || !nextValue.length) {
+                return
+            }
+
+            // Причина такого хардкорного впиливания в последнем абзаце readme
+            this.map.addFigure(SquareFigure.Factory(nextValue[nextValue.length-1]))
         },
     },
 }

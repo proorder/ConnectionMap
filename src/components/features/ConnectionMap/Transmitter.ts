@@ -10,13 +10,16 @@ export default class Transmitter {
     canvas: HTMLCanvasElement
     getProvidedFigures: () => Iterable<IEventful>
     onHoverState: IShape[] = []
+    cnvIsDown: boolean = false
     onDownState: IShape[] = []
     emitCursor: (x: number, y: number) => void
+    moveCanvasCenter: (x: number, y: number) => void
 
-    constructor (canvas: HTMLCanvasElement, getFigures: () => Iterable<IEventful>, emitCursor: (x: number, y: number) => void) {
+    constructor (canvas: HTMLCanvasElement, callbacks: { getFigures: () => Iterable<IEventful>, emitCursor: (x: number, y: number) => void, moveCenter: (x: number, y: number) => void }) {
         this.canvas = canvas
-        this.getProvidedFigures = getFigures
-        this.emitCursor = emitCursor
+        this.getProvidedFigures = callbacks.getFigures
+        this.emitCursor = callbacks.emitCursor
+        this.moveCanvasCenter = callbacks.moveCenter
 
         this.initialize()
     }
@@ -46,14 +49,17 @@ export default class Transmitter {
         this.centerY = height / 2
 
         this.canvas.addEventListener('pointermove', ({ offsetX, offsetY }) => {
+            if (this.cnvIsDown) {
+                this.moveCanvasCenter(offsetX, offsetY)
+                return
+            }
             this.emitCursor(offsetX, offsetY)
             if (this.onDownState.length) {
                 this.onDownState.forEach(s => {
                     s.onMove && s.onMove({ x: offsetX, y: offsetY })
                 })
                 return
-            }
-
+            } 
             // this.eventMiddleware(TransmitterEvent.Move)
             const shape = this.detectElement(offsetX, offsetY)
             if (!shape) {
@@ -87,21 +93,27 @@ export default class Transmitter {
     }
 
     onPointerDown ({ offsetX, offsetY, pointerId }: PointerEvent) {
+        this.emitCursor(offsetX, offsetY)
         this.canvas.setPointerCapture(pointerId)
 
         this.eventMiddleware(TransmitterEvent.Down)
         const shape = this.detectElement(offsetX, offsetY)
-        if (!shape || !shape.onPointerDown) {
+        if (!shape) {
+            this.cnvIsDown = true
             return
         }
 
         this.onDownState.push(shape)
-        shape.onPointerDown({ x: offsetX, y: offsetY })
+        shape.onPointerDown && shape.onPointerDown({ x: offsetX, y: offsetY })
     }
 
     onPointerUp ({ offsetX, offsetY }: PointerEvent) {
         if (this.onDownState.length) {
             this.onDownState = []
+            return
+        }
+        if (this.cnvIsDown) {
+            this.cnvIsDown = false
             return
         }
         this.eventMiddleware(TransmitterEvent.Up)

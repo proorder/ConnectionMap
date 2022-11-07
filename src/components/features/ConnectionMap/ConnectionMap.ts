@@ -3,9 +3,6 @@ import type { IEventful } from './types'
 import type BaseFigure from './figures/BaseFigure'
 import Transmitter from './Transmitter'
 import CurveLineFigure from './figures/CurveLineFigure'
-import type { StoreFigure } from '@/components/features/FigureConstructor/types'
-import { SquareFigure } from './figures'
-import { Square, Circle } from './shapes'
 
 export default class ConnectionMap {
     canvas: HTMLCanvasElement | null = null
@@ -39,7 +36,14 @@ export default class ConnectionMap {
         this.canvas = canvas
         this.ctx = canvas.getContext('2d')
 
-        this.transmitter = new Transmitter(canvas, this.getFigures.bind(this), this.setCursor.bind(this))
+        this.transmitter = new Transmitter(
+            canvas,
+            {
+                getFigures: this.getFigures.bind(this),
+                emitCursor: this.setCursor.bind(this),
+                moveCenter: this.moveCenter.bind(this),
+            },
+        )
     }
 
     unmount () {
@@ -68,21 +72,12 @@ export default class ConnectionMap {
         return this
     }
 
-    addFigures (figures: StoreFigure[]) {
-        const getShapeClass = (type) => {
-            switch (type) {
-                case 'square':
-                    return Square
-                default:
-                    return Circle
-            }
-        }
-
-        figures.forEach((f) => {
-            this.addFigure(SquareFigure.Factory([
-
-            ]))
-        })
+    moveCenter (x: number, y: number) {
+        this.biasX += x - this.cursorX
+        this.biasY += y - this.cursorY
+        this.cursorX = x
+        this.cursorY = y
+        this.render()
     }
 
     deleteFigure (id: string) {

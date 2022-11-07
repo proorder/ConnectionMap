@@ -9,12 +9,17 @@ export default class Circle extends Shape {
     isDecreasing: boolean = false
     radiusIncreaseValue: number = 0
     curve: CurveLineFigure | null = null
+    fill: string = '#E0FFFD'
 
     constructor (x: number, y: number, radius: number, props?: ShapeProps) {
         super()
         this.x = x
         this.y = y
         this.radius = radius
+        
+        if (props) {
+            this.setupProps(props)
+        }
     }
 
     onClick () {
@@ -92,7 +97,7 @@ export default class Circle extends Shape {
 
     protected ownRender (ctx: CanvasRenderingContext2D, x: number, y: number) {
         ctx.beginPath()
-        ctx.fillStyle = '#E0FFFD'
+        ctx.fillStyle = this.fill
         ctx.arc(x, y, this.radius + this.radiusIncreaseValue, 0, Math.PI * 2)
         ctx.fill()
         ctx.closePath()

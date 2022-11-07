@@ -56,7 +56,7 @@ export interface IShape {
 }
 
 export interface ShapeProps {
-    backgroundColor: string
-    strokeWidth: string
-    strokeColor: string
+    backgroundColor?: string
+    strokeWidth?: string
+    strokeColor?: string
 }

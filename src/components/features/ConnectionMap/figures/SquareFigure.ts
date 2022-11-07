@@ -1,6 +1,7 @@
 import BaseFigure from './BaseFigure'
-import type { IShape } from '../types'
+import type { IShape, ShapeProps } from '../types'
 import { Square, Circle } from '../shapes'
+import type { ShapeData, Shape } from '@/components/features/FigureConstructor/types'
 
 export default class SquareFigure extends BaseFigure {
     constructor (x: number, y: number, customShapes?: IShape[]) {
@@ -22,7 +23,32 @@ export default class SquareFigure extends BaseFigure {
         ]
     }
 
-    static Factory (shapes: IShape[]) {
-        const figure = new SquareFigure(0, 0, shapes)
+    static Factory (data: ShapeData[]) {
+        const getShapeClass = (type: Shape) => {
+            switch (type) {
+                case 'square':
+                    return Square
+                default:
+                    return Circle
+            }
+        }
+        
+        const shapes: IShape[] = data.map(
+            (s) => {
+                const shapeProps: ShapeProps = {}
+                if (s.color) {
+                    shapeProps.backgroundColor = s.color
+                }
+
+                return new (getShapeClass(s.type))(
+                    s.x,
+                    s.y,
+                    s.radius,
+                    shapeProps,
+                )
+            }
+        )
+
+        return new SquareFigure(0, 0, shapes)
     }
 }

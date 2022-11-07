@@ -1,2 +1,2 @@
-export type Figure = 'square' | 'circle'
-export type StoreFigure = { type: Figure, radius: number, x: number, y: number, id: string, color: string }
+export type Shape = 'square' | 'circle'
+export type ShapeData = { type: Shape, radius: number, x: number, y: number, id: string, color: string }

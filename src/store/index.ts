@@ -1,9 +1,10 @@
 import { createStore } from 'vuex'
-import type { StoreFigure } from '@/components/features/FigureConstructor/types'
+import type { ShapeData } from '@/components/features/FigureConstructor/types'
+import cloneDeep from 'lodash.clonedeep'
 
 export default createStore({
     state: {
-        figures: [] as StoreFigure[],
+        figures: [] as ShapeData[][],
     },
     getters: {
         figures (state) {
@@ -11,13 +12,13 @@ export default createStore({
         },
     },
     mutations: {
-        setFigures (state, figures) {
-            state.figures = figures
+        addFigure (state, figure: ShapeData[]) {
+            state.figures = [...state.figures, figure]
         },
     },
     actions: {
-        setFigures ({ commit }, figures) {
-            commit('setFigures', figures)
+        addFigure ({ commit }, figure: ShapeData[]) {
+            commit('addFigure', figure)
         },
     },
 })
