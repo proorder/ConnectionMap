@@ -1,5 +1,7 @@
 # ConnectionMap
 
+![Demo gif](https://github.com/proorder/ConnectionMap/blob/master/Demo.gif)
+
 ```sh
 npm install && npm run dev
 ```
